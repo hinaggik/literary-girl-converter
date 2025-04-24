@@ -3,24 +3,18 @@
 ユーザーが入力した言葉や感情を、静かで詩的な文学少女風の文章に変換して返すNext.js+OpenAI APIアプリです。
 
 ## セットアップ
-
 1. 必要なパッケージをインストール
-
-```
-npm install
-```
-
+    ```bash
+    npm install
+    ```
 2. OpenAI APIキーを`.env.local`に設定
-
-```
-OPENAI_API_KEY=sk-...
-```
-
+    ```bash
+    OPENAI_API_KEY=sk-...
+    ```
 3. 開発サーバー起動
-
-```
-npm run dev
-```
+    ```bash
+    npm run dev
+    ```
 
 ## 技術構成
 - Next.js
