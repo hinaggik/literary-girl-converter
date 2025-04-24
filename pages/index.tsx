@@ -17,21 +17,24 @@ function getRandomSampleText() {
 }
 
 export default function Home() {
-  const [inputText, setInputText] = useState('');
+  // デフォルトで自動生成テキストを入力欄に設定
+  const [inputText, setInputText] = useState(getRandomSampleText());
   const [outputText, setOutputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [placeholder, setPlaceholder] = useState(getRandomSampleText());
+  const [isVerticalMode, setIsVerticalMode] = useState(false);
   // DOM参照
   const poemBoxRef = useRef<HTMLDivElement>(null);
   const horizontalBtnRef = useRef<HTMLButtonElement>(null);
   const verticalBtnRef = useRef<HTMLButtonElement>(null);
   const modeIndicatorRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const outputTextRef = useRef<HTMLDivElement>(null);
 
   // 直接DOMを操作する関数
   function setHorizontalMode() {
     console.log('Setting horizontal mode via direct DOM');
+    setIsVerticalMode(false);
     if (poemBoxRef.current) {
       poemBoxRef.current.classList.remove('poem-vertical');
       poemBoxRef.current.classList.add('poem-horizontal');
@@ -47,6 +50,7 @@ export default function Home() {
 
   function setVerticalMode() {
     console.log('Setting vertical mode via direct DOM');
+    setIsVerticalMode(true);
     if (poemBoxRef.current) {
       poemBoxRef.current.classList.remove('poem-horizontal');
       poemBoxRef.current.classList.add('poem-vertical');
@@ -60,14 +64,27 @@ export default function Home() {
     }
   }
 
-  // 新しいプレースホルダーをセットする関数
-  const refreshPlaceholder = () => {
-    setPlaceholder(getRandomSampleText());
+  // 新しい例文を生成する関数
+  const generateNewSample = () => {
+    setInputText(getRandomSampleText());
   };
 
-  // 初期化時にプレースホルダーをセット
+  // テキストをクリップボードにコピーする関数
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        alert('コピーしました！');
+      })
+      .catch((err) => {
+        console.error('コピーに失敗しました:', err);
+        alert('コピーに失敗しました。');
+      });
+  };
+
+  // 初期化
   useEffect(() => {
-    refreshPlaceholder();
+    // 初期表示モードを横書きに設定
+    setHorizontalMode();
   }, []);
 
   // 文章変換API呼び出し
@@ -236,7 +253,6 @@ export default function Home() {
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             rows={5}
-            placeholder={placeholder}
             style={{ fontSize: '1rem' }}
           />
           
@@ -251,11 +267,28 @@ export default function Home() {
                 fontSize: '0.85rem'
               }}
               onClick={() => {
+                setInputText('');
                 if (textareaRef.current) {
-                  setInputText(placeholder);
                   textareaRef.current.focus();
                 }
-                refreshPlaceholder();
+              }}
+            >
+              クリア
+            </button>
+            <button 
+              type="button"
+              style={{ 
+                backgroundColor: '#e9e6f3', 
+                color: '#6d5c7c',
+                flex: '0 0 auto',
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+              onClick={() => {
+                generateNewSample();
+                if (textareaRef.current) {
+                  textareaRef.current.focus();
+                }
               }}
             >
               例文を使う
@@ -277,8 +310,24 @@ export default function Home() {
 
         {outputText && (
           <div style={{ marginTop: 24 }}>
-            <h2>文学少女の返答：</h2>
-            <div ref={poemBoxRef} className="poem-box poem-horizontal">
+            <h2 style={{ textAlign: 'center' }}>文学少女の返答：</h2>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(outputText)}
+                style={{ 
+                  backgroundColor: '#e9e6f3', 
+                  color: '#6d5c7c',
+                  padding: '5px 10px',
+                  fontSize: '0.85rem',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                コピー
+              </button>
+            </div>
+            <div ref={poemBoxRef} className={isVerticalMode ? "poem-box poem-vertical" : "poem-box poem-horizontal"}>
               {outputText}
             </div>
           </div>
