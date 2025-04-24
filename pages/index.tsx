@@ -2,15 +2,32 @@ import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Script from 'next/script';
 
+// ランダムな例文の配列
+export const sampleTexts = [
+  '今日は雨でもなんだか気分が沈んでた',
+  '天気がいいと心も晴れやかになるような気がする',
+  '夜の虹の上を歩くような気もちになるときがある',
+  '水たまりに映る空が綺麗だった',
+  '君と歩いた広場は今も変わらない',
+];
+
+// ランダムな例文を取得する関数
+function getRandomSampleText() {
+  return sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+}
+
 export default function Home() {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [placeholder, setPlaceholder] = useState(getRandomSampleText());
   // DOM参照
   const poemBoxRef = useRef<HTMLDivElement>(null);
   const horizontalBtnRef = useRef<HTMLButtonElement>(null);
   const verticalBtnRef = useRef<HTMLButtonElement>(null);
   const modeIndicatorRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 直接DOMを操作する関数
   function setHorizontalMode() {
@@ -43,14 +60,30 @@ export default function Home() {
     }
   }
 
+  // 新しいプレースホルダーをセットする関数
+  const refreshPlaceholder = () => {
+    setPlaceholder(getRandomSampleText());
+  };
+
+  // 初期化時にプレースホルダーをセット
+  useEffect(() => {
+    refreshPlaceholder();
+  }, []);
+
   // 文章変換API呼び出し
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Submit button clicked!', inputText);
+    
+    // 入力のバリデーション
     if (!inputText.trim()) {
       console.log('Empty input, not sending request');
+      setErrorMessage('あなたの言葉を教えてください……');
       return;
     }
+    
+    // エラーメッセージをクリア
+    setErrorMessage('');
     
     setLoading(true);
     setOutputText('');
@@ -58,7 +91,6 @@ export default function Home() {
     try {
       console.log('Sending request to API...');
       // 絶対URLを使用してAPIを呼び出す
-      // /api エンドポイントに変更
       const url = window.location.origin + '/api';
       console.log('API URL:', url);
       
@@ -77,10 +109,16 @@ export default function Home() {
       
       const data = await response.json();
       console.log('API response data:', data);
-      setOutputText(data.output);
+      
+      if (data && data.output) {
+        setOutputText(data.output);
+      } else {
+        throw new Error('API returned empty response');
+      }
     } catch (error) {
       console.error('Error in API call:', error);
       setOutputText('文学少女が言葉を見つけられませんでした...');
+      setErrorMessage('エラーが発生しました。もう一度お試しください。');
     } finally {
       setLoading(false);
     }
@@ -157,16 +195,47 @@ export default function Home() {
         </Script>
         
         <form onSubmit={handleSubmit}>
+          {/* エラーメッセージ表示エリア */}
+          {errorMessage && (
+            <div style={{ color: '#d9534f', marginBottom: '10px', fontSize: '0.9rem', textAlign: 'center' }}>
+              {errorMessage}
+            </div>
+          )}
+          
           <textarea
+            ref={textareaRef}
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             rows={5}
-            placeholder="今日は雨でもなんだか気分が沈んでた"
+            placeholder={placeholder}
+            style={{ fontSize: '1rem' }}
           />
-          <div style={{ textAlign: 'center', marginTop: '12px' }}>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', gap: '10px' }}>
+            <button 
+              type="button"
+              style={{ 
+                backgroundColor: '#e9e6f3', 
+                color: '#6d5c7c',
+                flex: '0 0 auto',
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+              onClick={() => {
+                if (textareaRef.current) {
+                  setInputText(placeholder);
+                  textareaRef.current.focus();
+                }
+                refreshPlaceholder();
+              }}
+            >
+              例文を使う
+            </button>
+            
             <button 
               type="button" 
               disabled={loading}
+              style={{ flex: '1 1 auto' }}
               onClick={(e) => {
                 console.log('Convert button clicked directly');
                 handleSubmit(e as unknown as React.FormEvent);
