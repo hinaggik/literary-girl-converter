@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&display=swap');
+
 body {
   font-family: 'Yu Gothic', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
   background: #f8f6f3;
@@ -65,29 +67,52 @@ h2 {
 .poem-box {
   white-space: pre-wrap;
   background: #f9f9f9;
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 8px;
   min-height: 100px;
   line-height: 2;
   box-sizing: border-box;
+  /* 文字が消えるような端の効果 */
+  border: 1px solid #eee;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.02);
+  position: relative;
+}
+
+/* 原稿用紙風グリッドモード */
+.manuscript-mode {
+  background-image: linear-gradient(#f0f0f0 1px, transparent 1px), 
+                    linear-gradient(90deg, #f0f0f0 1px, transparent 1px);
+  background-size: 20px 20px; /* マス目の大きさ */
+  background-color: #fffcf7;
+  border: 1px solid #e0d9d0;
 }
 
 /* 横書きモード（デフォルト） */
 .poem-horizontal {
   text-align: center;
-  font-family: 'Hiragino Mincho ProN', serif;
+  font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  text-wrap: pretty;
 }
 
 /* 縦書きモード */
 .poem-vertical {
   writing-mode: vertical-rl;
-  text-orientation: upright;
+  text-orientation: mixed;
   text-align: start;
   height: 300px;
   margin: 0 auto;
   overflow-x: auto;
-  font-family: 'Hiragino Mincho ProN', serif;
+  font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
   padding: 1.5rem 1rem;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  line-break: strict;
+  word-break: normal;
+  /* 句読点での改行禁止を実現する代替プロパティ */
+  overflow-wrap: break-word;
+  text-justify: inter-character;
 }
 
 /* モード切り替えボタングループ */

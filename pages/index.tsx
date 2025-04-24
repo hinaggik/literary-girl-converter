@@ -23,6 +23,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isVerticalMode, setIsVerticalMode] = useState(false);
+  const [isManuscriptMode, setIsManuscriptMode] = useState(false);
   // DOM参照
   const poemBoxRef = useRef<HTMLDivElement>(null);
   const horizontalBtnRef = useRef<HTMLButtonElement>(null);
@@ -67,6 +68,29 @@ export default function Home() {
   // 新しい例文を生成する関数
   const generateNewSample = () => {
     setInputText(getRandomSampleText());
+  };
+  
+  // 原稿用紙モードの切り替え
+  const toggleManuscriptMode = () => {
+    setIsManuscriptMode(prev => !prev);
+  };
+  
+  // 文末句読点補正関数
+  const correctPunctuation = (text: string) => {
+    if (!text) return text;
+    
+    // 文末が「、」で終わる場合は「。」に変換
+    let corrected = text.trim();
+    if (corrected.endsWith('、')) {
+      corrected = corrected.slice(0, -1) + '。';
+    }
+    
+    // 文末に句点がない場合は「……」を追加
+    if (!/[。！？…]$/.test(corrected)) {
+      corrected += '……';
+    }
+    
+    return corrected;
   };
 
   // コピー通知用の状態管理
@@ -165,7 +189,9 @@ export default function Home() {
       console.log('API response data:', data);
       
       if (data && data.output) {
-        setOutputText(data.output);
+        // 文末句読点補正を適用してから表示
+        const correctedOutput = correctPunctuation(data.output);
+        setOutputText(correctedOutput);
       } else {
         throw new Error('API returned empty response or invalid format');
       }
@@ -199,25 +225,34 @@ export default function Home() {
         {/* 表示モード切替（常に表示） */}
         <div className="mode-toggle" style={{ marginBottom: '20px' }}>
           <div ref={modeIndicatorRef} style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
-            Horizontal mode active
+            {isVerticalMode ? '筆を縦に走らせるように…' : '筆を横に運ぶように…'}
           </div>
           <button 
             ref={horizontalBtnRef}
             onClick={setHorizontalMode}
-            className="active"
+            className={isVerticalMode ? '' : 'active'}
             type="button"
             id="horizontal-btn"
           >
-            横書き
+            横に綴る
           </button>
           <button 
             ref={verticalBtnRef}
             onClick={setVerticalMode}
-            className=""
+            className={isVerticalMode ? 'active' : ''}
             type="button"
             id="vertical-btn"
           >
-            縦書き
+            縦に綴る
+          </button>
+          <button
+            onClick={toggleManuscriptMode}
+            className={isManuscriptMode ? 'active' : ''}
+            type="button"
+            id="manuscript-btn"
+            style={{ marginLeft: '10px' }}
+          >
+            原稿用紙風
           </button>
         </div>
         
@@ -342,7 +377,7 @@ export default function Home() {
                 コピー
               </button>
             </div>
-            <div ref={poemBoxRef} className={isVerticalMode ? "poem-box poem-vertical" : "poem-box poem-horizontal"}>
+            <div ref={poemBoxRef} className={`poem-box ${isVerticalMode ? 'poem-vertical' : 'poem-horizontal'} ${isManuscriptMode ? 'manuscript-mode' : ''}`}>
               {outputText}
             </div>
           </div>
