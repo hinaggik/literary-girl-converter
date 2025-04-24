@@ -6,58 +6,42 @@ export default function Home() {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isVertical, setIsVertical] = useState(false);
+  // DOM参照
+  const poemBoxRef = useRef<HTMLDivElement>(null);
   const horizontalBtnRef = useRef<HTMLButtonElement>(null);
   const verticalBtnRef = useRef<HTMLButtonElement>(null);
+  const modeIndicatorRef = useRef<HTMLDivElement>(null);
 
-  // ページ読み込み後に直接DOMイベントをアタッチ
-  useEffect(() => {
-    console.log('Component mounted');
-    
-    // ボタンに直接イベントリスナーを追加
-    const horizontalBtn = horizontalBtnRef.current;
-    const verticalBtn = verticalBtnRef.current;
-    
-    // Horizontal button handler
-    const handleHorizontalClick = function() {
-      console.log('Horizontal button clicked via native event');
-      const indicator = document.getElementById('mode-indicator');
-      if (indicator) {
-        indicator.textContent = 'Horizontal mode activated';
-      }
-      setIsVertical(false);
-    };
-    
-    // Vertical button handler
-    const handleVerticalClick = function() {
-      console.log('Vertical button clicked via native event');
-      const indicator = document.getElementById('mode-indicator');
-      if (indicator) {
-        indicator.textContent = 'Vertical mode activated';
-      }
-      setIsVertical(true);
-    };
-    
-    if (horizontalBtn) {
-      console.log('Attaching event to horizontal button');
-      horizontalBtn.addEventListener('click', handleHorizontalClick);
+  // 直接DOMを操作する関数
+  function setHorizontalMode() {
+    console.log('Setting horizontal mode via direct DOM');
+    if (poemBoxRef.current) {
+      poemBoxRef.current.classList.remove('poem-vertical');
+      poemBoxRef.current.classList.add('poem-horizontal');
     }
-    
-    if (verticalBtn) {
-      console.log('Attaching event to vertical button');
-      verticalBtn.addEventListener('click', handleVerticalClick);
+    if (horizontalBtnRef.current && verticalBtnRef.current) {
+      horizontalBtnRef.current.classList.add('active');
+      verticalBtnRef.current.classList.remove('active');
     }
-    
-    return () => {
-      // クリーンアップ
-      if (horizontalBtn) {
-        horizontalBtn.removeEventListener('click', handleHorizontalClick);
-      }
-      if (verticalBtn) {
-        verticalBtn.removeEventListener('click', handleVerticalClick);
-      }
-    };
-  }, []);
+    if (modeIndicatorRef.current) {
+      modeIndicatorRef.current.textContent = 'Horizontal mode active';
+    }
+  }
+
+  function setVerticalMode() {
+    console.log('Setting vertical mode via direct DOM');
+    if (poemBoxRef.current) {
+      poemBoxRef.current.classList.remove('poem-horizontal');
+      poemBoxRef.current.classList.add('poem-vertical');
+    }
+    if (horizontalBtnRef.current && verticalBtnRef.current) {
+      horizontalBtnRef.current.classList.remove('active');
+      verticalBtnRef.current.classList.add('active');
+    }
+    if (modeIndicatorRef.current) {
+      modeIndicatorRef.current.textContent = 'Vertical mode active';
+    }
+  }
 
   // 文章変換API呼び出し
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,17 +72,12 @@ export default function Home() {
     }
   };
 
-  // モード切り替え用のシンプルな関数
-  function handleModeChange(mode: 'horizontal' | 'vertical') {
-    console.log(`Mode change requested: ${mode}`);
-    if (mode === 'horizontal') {
-      console.log('Setting to horizontal mode');
-      setIsVertical(false);
-    } else {
-      console.log('Setting to vertical mode');
-      setIsVertical(true);
-    }
-  }
+  // 初期化
+  useEffect(() => {
+    console.log('Initializing mode buttons');
+    // 初期表示モードを横書きに設定
+    setHorizontalMode();
+  }, []);
 
   return (
     <>
@@ -113,16 +92,13 @@ export default function Home() {
         
         {/* 表示モード切替（常に表示） */}
         <div className="mode-toggle" style={{ marginBottom: '20px' }}>
-          <div id="mode-indicator" style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
-            {isVertical ? 'Vertical mode active' : 'Horizontal mode active'}
+          <div ref={modeIndicatorRef} style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+            Horizontal mode active
           </div>
           <button 
             ref={horizontalBtnRef}
-            onClick={() => {
-              console.log('Horizontal React onClick fired');
-              setIsVertical(false);
-            }}
-            className={!isVertical ? 'active' : ''}
+            onClick={setHorizontalMode}
+            className="active"
             type="button"
             id="horizontal-btn"
           >
@@ -130,11 +106,8 @@ export default function Home() {
           </button>
           <button 
             ref={verticalBtnRef}
-            onClick={() => {
-              console.log('Vertical React onClick fired');
-              setIsVertical(true);
-            }}
-            className={isVertical ? 'active' : ''}
+            onClick={setVerticalMode}
+            className=""
             type="button"
             id="vertical-btn"
           >
@@ -186,7 +159,7 @@ export default function Home() {
         {outputText && (
           <div style={{ marginTop: 24 }}>
             <h2>文学少女の返答：</h2>
-            <div className={`poem-box ${isVertical ? 'poem-vertical' : 'poem-horizontal'}`}>
+            <div ref={poemBoxRef} className="poem-box poem-horizontal">
               {outputText}
             </div>
           </div>
