@@ -58,7 +58,8 @@ export default function Home() {
     try {
       console.log('Sending request to API...');
       // 絶対URLを使用してAPIを呼び出す
-      const url = window.location.origin + '/api/convert';
+      // /api エンドポイントに変更
+      const url = window.location.origin + '/api';
       console.log('API URL:', url);
       
       const response = await fetch(url, {
