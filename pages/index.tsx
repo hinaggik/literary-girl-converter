@@ -37,8 +37,14 @@ export default function Home() {
   };
 
   // 表示モード切り替え
-  const toggleMode = () => {
-    setIsVertical(!isVertical);
+  const setHorizontalMode = () => {
+    console.log('Setting horizontal mode');
+    setIsVertical(false);
+  };
+
+  const setVerticalMode = () => {
+    console.log('Setting vertical mode');
+    setIsVertical(true);
   };
 
   return (
@@ -55,14 +61,14 @@ export default function Home() {
         {/* 表示モード切替（常に表示） */}
         <div className="mode-toggle" style={{ marginBottom: '20px' }}>
           <button 
-            onClick={() => setIsVertical(false)}
+            onClick={setHorizontalMode}
             className={!isVertical ? 'active' : ''}
             type="button"
           >
             横書き
           </button>
           <button 
-            onClick={() => setIsVertical(true)}
+            onClick={setVerticalMode}
             className={isVertical ? 'active' : ''}
             type="button"
           >
