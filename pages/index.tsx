@@ -69,17 +69,25 @@ export default function Home() {
     setInputText(getRandomSampleText());
   };
 
+  // コピー通知用の状態管理
+  const [copyMessage, setCopyMessage] = useState('');
+  
   // テキストをクリップボードにコピーする関数
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
       .then(() => {
-        alert('コピーしました！');
+        setCopyMessage('コピーしました！');
+        // 3秒後に通知を消す
+        setTimeout(() => setCopyMessage(''), 3000);
       })
       .catch((err) => {
         console.error('コピーに失敗しました:', err);
-        alert('コピーに失敗しました。');
+        setCopyMessage('コピーに失敗しました。');
+        // 3秒後に通知を消す
+        setTimeout(() => setCopyMessage(''), 3000);
       });
   };
+
 
   // 初期化
   useEffect(() => {
@@ -180,13 +188,13 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Literary Girl Converter</title>
+        <title>文学少女コンバーター</title>
         <meta name="description" content="日常の言葉を文学少女風の詩的な文章に変換するツール" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
       <main>
-        <h1>Literary Girl Converter</h1>
+        <h1>文学少女コンバーター</h1>
         
         {/* 表示モード切替（常に表示） */}
         <div className="mode-toggle" style={{ marginBottom: '20px' }}>
@@ -245,6 +253,13 @@ export default function Home() {
           {errorMessage && (
             <div style={{ color: '#d9534f', marginBottom: '10px', fontSize: '0.9rem', textAlign: 'center' }}>
               {errorMessage}
+            </div>
+          )}
+          
+          {/* コピー通知メッセージ表示エリア */}
+          {copyMessage && (
+            <div style={{ color: '#28a745', marginBottom: '10px', fontSize: '0.9rem', textAlign: 'center' }}>
+              {copyMessage}
             </div>
           )}
           
