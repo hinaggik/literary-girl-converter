@@ -1,22 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
+import Script from 'next/script';
 
 export default function Home() {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
+  const horizontalBtnRef = useRef<HTMLButtonElement>(null);
+  const verticalBtnRef = useRef<HTMLButtonElement>(null);
 
-  // デバッグ用処理
+  // ページ読み込み後に直接DOMイベントをアタッチ
   useEffect(() => {
-    console.log('Component mounted or updated');
-    console.log('Current mode:', isVertical ? 'Vertical' : 'Horizontal');
+    console.log('Component mounted');
     
-    // 状態が変化したときにログを出力
-    return () => {
-      console.log('Component will update or unmount');
+    // ボタンに直接イベントリスナーを追加
+    const horizontalBtn = horizontalBtnRef.current;
+    const verticalBtn = verticalBtnRef.current;
+    
+    // Horizontal button handler
+    const handleHorizontalClick = function() {
+      console.log('Horizontal button clicked via native event');
+      const indicator = document.getElementById('mode-indicator');
+      if (indicator) {
+        indicator.textContent = 'Horizontal mode activated';
+      }
+      setIsVertical(false);
     };
-  }, [isVertical]);
+    
+    // Vertical button handler
+    const handleVerticalClick = function() {
+      console.log('Vertical button clicked via native event');
+      const indicator = document.getElementById('mode-indicator');
+      if (indicator) {
+        indicator.textContent = 'Vertical mode activated';
+      }
+      setIsVertical(true);
+    };
+    
+    if (horizontalBtn) {
+      console.log('Attaching event to horizontal button');
+      horizontalBtn.addEventListener('click', handleHorizontalClick);
+    }
+    
+    if (verticalBtn) {
+      console.log('Attaching event to vertical button');
+      verticalBtn.addEventListener('click', handleVerticalClick);
+    }
+    
+    return () => {
+      // クリーンアップ
+      if (horizontalBtn) {
+        horizontalBtn.removeEventListener('click', handleHorizontalClick);
+      }
+      if (verticalBtn) {
+        verticalBtn.removeEventListener('click', handleVerticalClick);
+      }
+    };
+  }, []);
 
   // 文章変換API呼び出し
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,27 +113,61 @@ export default function Home() {
         
         {/* 表示モード切替（常に表示） */}
         <div className="mode-toggle" style={{ marginBottom: '20px' }}>
+          <div id="mode-indicator" style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+            {isVertical ? 'Vertical mode active' : 'Horizontal mode active'}
+          </div>
           <button 
+            ref={horizontalBtnRef}
             onClick={() => {
-              console.log('Horizontal button clicked');
-              handleModeChange('horizontal');
+              console.log('Horizontal React onClick fired');
+              setIsVertical(false);
             }}
             className={!isVertical ? 'active' : ''}
             type="button"
+            id="horizontal-btn"
           >
             横書き
           </button>
           <button 
+            ref={verticalBtnRef}
             onClick={() => {
-              console.log('Vertical button clicked');
-              handleModeChange('vertical');
+              console.log('Vertical React onClick fired');
+              setIsVertical(true);
             }}
             className={isVertical ? 'active' : ''}
             type="button"
+            id="vertical-btn"
           >
             縦書き
           </button>
         </div>
+        
+        {/* 直接JavaScriptをページに埋め込む */}
+        <Script id="direct-js" strategy="afterInteractive">
+          {`
+            console.log('Direct script loaded');
+            document.addEventListener('DOMContentLoaded', function() {
+              console.log('DOM fully loaded');
+              // 別アプローチで直接イベントをアタッチ
+              const hBtn = document.getElementById('horizontal-btn');
+              const vBtn = document.getElementById('vertical-btn');
+              
+              if (hBtn) {
+                hBtn.onclick = function() {
+                  console.log('Horizontal clicked via direct DOM');
+                  document.getElementById('mode-indicator').textContent = 'Horizontal mode activated via direct JS';
+                };
+              }
+              
+              if (vBtn) {
+                vBtn.onclick = function() {
+                  console.log('Vertical clicked via direct DOM');
+                  document.getElementById('mode-indicator').textContent = 'Vertical mode activated via direct JS';
+                };
+              }
+            });
+          `}
+        </Script>
         
         <form onSubmit={handleSubmit}>
           <textarea
