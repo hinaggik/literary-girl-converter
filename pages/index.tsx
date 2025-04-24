@@ -52,6 +52,24 @@ export default function Home() {
       <main>
         <h1>Literary Girl Converter</h1>
         
+        {/* 表示モード切替（常に表示） */}
+        <div className="mode-toggle" style={{ marginBottom: '20px' }}>
+          <button 
+            onClick={() => setIsVertical(false)}
+            className={!isVertical ? 'active' : ''}
+            type="button"
+          >
+            横書き
+          </button>
+          <button 
+            onClick={() => setIsVertical(true)}
+            className={isVertical ? 'active' : ''}
+            type="button"
+          >
+            縦書き
+          </button>
+        </div>
+        
         <form onSubmit={handleSubmit}>
           <textarea
             value={inputText}
@@ -68,21 +86,6 @@ export default function Home() {
 
         {outputText && (
           <div style={{ marginTop: 24 }}>
-            <div className="mode-toggle">
-              <button 
-                onClick={toggleMode} 
-                className={!isVertical ? 'active' : ''}
-              >
-                横書き
-              </button>
-              <button 
-                onClick={toggleMode} 
-                className={isVertical ? 'active' : ''}
-              >
-                縦書き
-              </button>
-            </div>
-            
             <h2>文学少女の返答：</h2>
             <div className={`poem-box ${isVertical ? 'poem-vertical' : 'poem-horizontal'}`}>
               {outputText}
