@@ -46,26 +46,39 @@ export default function Home() {
   // 文章変換API呼び出し
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim()) return;
+    console.log('Submit button clicked!', inputText);
+    if (!inputText.trim()) {
+      console.log('Empty input, not sending request');
+      return;
+    }
     
     setLoading(true);
     setOutputText('');
     
     try {
-      const response = await fetch('/api/convert', {
+      console.log('Sending request to API...');
+      // 絶対URLを使用してAPIを呼び出す
+      const url = window.location.origin + '/api/convert';
+      console.log('API URL:', url);
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputText }),
+        cache: 'no-cache', // キャッシュを使用しない
       });
       
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('API response was not ok');
+        throw new Error(`API response error: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log('API response data:', data);
       setOutputText(data.output);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in API call:', error);
       setOutputText('文学少女が言葉を見つけられませんでした...');
     } finally {
       setLoading(false);
@@ -150,7 +163,14 @@ export default function Home() {
             placeholder="今日は雨でもなんだか気分が沈んでた"
           />
           <div style={{ textAlign: 'center', marginTop: '12px' }}>
-            <button type="submit" disabled={loading}>
+            <button 
+              type="button" 
+              disabled={loading}
+              onClick={(e) => {
+                console.log('Convert button clicked directly');
+                handleSubmit(e as unknown as React.FormEvent);
+              }}
+            >
               {loading ? '変換中...' : '文学少女に変換'}
             </button>
           </div>
