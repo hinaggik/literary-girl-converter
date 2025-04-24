@@ -90,30 +90,59 @@ export default function Home() {
     
     try {
       console.log('Sending request to API...');
-      // 絶対URLを使用してAPIを呼び出す
-      const url = window.location.origin + '/api';
-      console.log('API URL:', url);
       
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputText }),
-        cache: 'no-cache', // キャッシュを使用しない
-      });
+      // 複数のAPIエンドポイントを順番に試す
+      const apiEndpoints = [
+        '/api/convert',       // 1. /api/convert を最初に試す
+        '/api',              // 2. /api を試す
+        '/api/index',        // 3. /api/index を試す
+        '/api/convert.js',   // 4. 拡張子付きも試す
+        '/api/index.js'      // 5. 拡張子付きも試す
+      ];
       
-      console.log('Response status:', response.status);
+      let response = null;
+      let endpoint = '';
+      let error: Error | null = null;
       
-      if (!response.ok) {
-        throw new Error(`API response error: ${response.status}`);
+      // 複数のエンドポイントを順番に試す
+      for (const path of apiEndpoints) {
+        try {
+          const url = window.location.origin + path;
+          console.log(`Trying API endpoint: ${url}`);
+          
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: inputText }),
+            cache: 'no-cache', // キャッシュを使用しない
+          });
+          
+          console.log(`Response from ${path}:`, resp.status);
+          
+          if (resp.ok) {
+            response = resp;
+            endpoint = path;
+            break;
+          }
+        } catch (e) {
+          console.error(`Error with endpoint ${path}:`, e);
+          error = e instanceof Error ? e : new Error(String(e));
+        }
       }
       
+      // すべてのエンドポイントが失敗した場合
+      if (!response) {
+        throw new Error(`All API endpoints failed. Last error: ${error?.message || 'Unknown error'}`);
+      }
+      
+      console.log(`Successfully connected to: ${endpoint}`);
       const data = await response.json();
       console.log('API response data:', data);
       
       if (data && data.output) {
         setOutputText(data.output);
       } else {
-        throw new Error('API returned empty response');
+        throw new Error('API returned empty response or invalid format');
       }
     } catch (error) {
       console.error('Error in API call:', error);
