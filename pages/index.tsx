@@ -74,24 +74,6 @@ export default function Home() {
   const toggleManuscriptMode = () => {
     setIsManuscriptMode(prev => !prev);
   };
-  
-  // 文末句読点補正関数
-  const correctPunctuation = (text: string) => {
-    if (!text) return text;
-    
-    // 文末が「、」で終わる場合は「。」に変換
-    let corrected = text.trim();
-    if (corrected.endsWith('、')) {
-      corrected = corrected.slice(0, -1) + '。';
-    }
-    
-    // 文末に句点がない場合は「……」を追加
-    if (!/[。！？…]$/.test(corrected)) {
-      corrected += '……';
-    }
-    
-    return corrected;
-  };
 
   // コピー通知用の状態管理
   const [copyMessage, setCopyMessage] = useState('');
@@ -189,9 +171,8 @@ export default function Home() {
       console.log('API response data:', data);
       
       if (data && data.output) {
-        // 文末句読点補正を適用してから表示
-        const correctedOutput = correctPunctuation(data.output);
-        setOutputText(correctedOutput);
+        // APIからの詩的な文章をそのまま表示
+        setOutputText(data.output);
       } else {
         throw new Error('API returned empty response or invalid format');
       }

@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const completion = await openai.chat.completions.create({
   model: 'gpt-3.5-turbo',
   messages: [
-    { role: 'system', content: 'あなたは静かな文学少女です。ユーザーが入力した言葉や感情を、放課後の文芸部で綴るような、静かで詩的な日記文に変換してください。' },
+    { role: 'system', content: 'あなたは静かな文学少女です。ユーザーが入力した言葉や感情を、放課後の文芸部で綴るような、静かで詩的な日記文に変換してください。文末の表現は、「。」、「……」、「――」など、詩的な雰囲気を大切にして、内容に合った適切な表現を選んでください。文章全体が基調的で物思いな雰囲気になるようにしてください。' },
     { role: 'user', content: text },
   ],
   max_tokens: 200,
