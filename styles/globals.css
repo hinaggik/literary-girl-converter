@@ -5,17 +5,26 @@ body {
   margin: 0;
   padding: 0;
 }
+
 main {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: clamp(16px, 5vw, 24px);
+  width: 100%;
+  max-width: 800px;
+  margin: clamp(20px, 5vw, 40px) auto;
+  box-sizing: border-box;
 }
+
 h1 {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 5vw, 2rem);
   letter-spacing: 0.1em;
   margin-bottom: 1.5rem;
   color: #6d5c7c;
+  text-align: center;
 }
+
 textarea {
   font-size: 1rem;
   border: 1px solid #ddd;
@@ -23,7 +32,11 @@ textarea {
   padding: 10px;
   background: #faf9f7;
   resize: vertical;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
+
 button {
   background: #a7a3c5;
   color: #fff;
@@ -32,12 +45,79 @@ button {
   cursor: pointer;
   font-size: 1rem;
   transition: background 0.2s;
+  padding: clamp(6px, 2vw, 8px) clamp(16px, 4vw, 24px);
 }
+
+button:hover {
+  background: #8d89b8;
+}
+
 button:disabled {
   background: #ccc;
 }
+
 h2 {
   color: #6d5c7c;
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
+}
+
+.poem-box {
+  white-space: pre-wrap;
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  min-height: 100px;
+  line-height: 2;
+  box-sizing: border-box;
+}
+
+/* 横書きモード（デフォルト） */
+.poem-horizontal {
+  text-align: center;
+  font-family: 'Hiragino Mincho ProN', serif;
+}
+
+/* 縦書きモード */
+.poem-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  text-align: start;
+  height: 300px;
+  margin: 0 auto;
+  overflow-x: auto;
+  font-family: 'Hiragino Mincho ProN', serif;
+  padding: 1.5rem 1rem;
+}
+
+/* モード切り替えボタングループ */
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  justify-content: flex-end;
+}
+
+.mode-toggle button {
+  background: #e9e6f3;
+  color: #6d5c7c;
+  padding: 4px 12px;
+  font-size: 0.9rem;
+}
+
+.mode-toggle button.active {
+  background: #a7a3c5;
+  color: white;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 600px) {
+  main {
+    padding: 16px;
+    margin: 16px auto;
+  }
+  
+  .poem-vertical {
+    height: 250px;
+  }
 }
