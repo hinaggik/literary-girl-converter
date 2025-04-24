@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
 export default function Home() {
@@ -6,6 +6,17 @@ export default function Home() {
   const [outputText, setOutputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
+
+  // デバッグ用処理
+  useEffect(() => {
+    console.log('Component mounted or updated');
+    console.log('Current mode:', isVertical ? 'Vertical' : 'Horizontal');
+    
+    // 状態が変化したときにログを出力
+    return () => {
+      console.log('Component will update or unmount');
+    };
+  }, [isVertical]);
 
   // 文章変換API呼び出し
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,16 +47,17 @@ export default function Home() {
     }
   };
 
-  // 表示モード切り替え
-  const setHorizontalMode = () => {
-    console.log('Setting horizontal mode');
-    setIsVertical(false);
-  };
-
-  const setVerticalMode = () => {
-    console.log('Setting vertical mode');
-    setIsVertical(true);
-  };
+  // モード切り替え用のシンプルな関数
+  function handleModeChange(mode: 'horizontal' | 'vertical') {
+    console.log(`Mode change requested: ${mode}`);
+    if (mode === 'horizontal') {
+      console.log('Setting to horizontal mode');
+      setIsVertical(false);
+    } else {
+      console.log('Setting to vertical mode');
+      setIsVertical(true);
+    }
+  }
 
   return (
     <>
@@ -61,14 +73,20 @@ export default function Home() {
         {/* 表示モード切替（常に表示） */}
         <div className="mode-toggle" style={{ marginBottom: '20px' }}>
           <button 
-            onClick={setHorizontalMode}
+            onClick={() => {
+              console.log('Horizontal button clicked');
+              handleModeChange('horizontal');
+            }}
             className={!isVertical ? 'active' : ''}
             type="button"
           >
             横書き
           </button>
           <button 
-            onClick={setVerticalMode}
+            onClick={() => {
+              console.log('Vertical button clicked');
+              handleModeChange('vertical');
+            }}
             className={isVertical ? 'active' : ''}
             type="button"
           >
